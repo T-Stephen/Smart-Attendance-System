@@ -1,0 +1,104 @@
+# ============================================================
+# PYTHON BYTECODE & COMPILATION ARTIFACTS
+# ============================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ============================================================
+# TEMPORARY BACKUPS, EDITORS & SYSTEM ARTIFACTS
+# ============================================================
+*.bak
+*.phase2_bak
+*.pre_maint_bak
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# ============================================================
+# SENSITIVE DATA, CREDENTIALS & RUNTIME DATABASES
+# (Protects passwords, student identities & attendance logs)
+# ============================================================
+database/*.db
+database/*.sqlite
+database/*.sqlite3
+attendance/*.csv
+
+# ============================================================
+# GENERATED OPERATIONAL REPORTS & THREAT CAPTURES
+# ============================================================
+reports/threat_captures/
+reports/*.xlsx
+reports/*.pdf
+reports/*.html
+
+# ============================================================
+# BIOMETRIC FACIAL IMAGERY & HEAVY TRAINING DATASETS
+# (Excludes real student face photos & external benchmarks)
+# ============================================================
+registered_faces/
+dataset/
+training_dataset/
+extracted_faces/
+webface_112x112/
+database/Stephen/
+database/Praveen/
+
+# ============================================================
+# SENSITIVE BIOMETRIC EMBEDDINGS & PRODUCTION MODELS
+# (Protects real student 512-d FaceNet embeddings & roll numbers)
+# ============================================================
+models/*.pkl
+models/student_embeddings.pkl
+models/embeddings.pkl
+models/student_label_encoder.pkl
+models/student_face_model.pkl
+models/tuned_svm_results.pkl
+models_backup/
+
+# Allow documentation in models/
+!models/README.md
+
+# ============================================================
+# SECRETS, API KEYS & ENVIRONMENT CONFIGURATION
+# ============================================================
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+credentials.json
+secrets.json
+
+# ============================================================
+# VIRTUAL ENVIRONMENTS & IDE CONFIGURATION
+# ============================================================
+.venv/
+env/
+venv/
+ENV/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
