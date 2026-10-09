@@ -891,776 +891,808 @@ def double_click_attendance(event):
 
 
 # ============================================================
-# MAIN WINDOW
+# MODULE-LEVEL WIDGET REFERENCES
 # ============================================================
 
-root = tk.Tk()
-
-root.title(
-    "Student Database - Smart Attendance System"
-)
-
-root.geometry(
-    "1050x800"
-)
-
-root.minsize(
-    950,
-    700
-)
-
-root.configure(
-    bg="#EAF2F8"
-)
-
-root.resizable(
-    True,
-    True
-)
+root = None
+tree = None
+total_label = None
+search_entry = None
+add_id_entry = None
+add_name_entry = None
+add_department_combo = None
+add_year_combo = None
+name_entry = None
+department_combo = None
+year_combo = None
 
 
 # ============================================================
-# STYLE
+# APPLICATION ENTRY POINT
 # ============================================================
 
-style = ttk.Style()
+def launch_student_database():
+    global root, tree, total_label, search_entry
+    global add_id_entry, add_name_entry, add_department_combo, add_year_combo
+    global name_entry, department_combo, year_combo
 
-try:
+    # ============================================================
+    # MAIN WINDOW
+    # ============================================================
 
-    style.theme_use(
-        "clam"
+    root = tk.Tk()
+
+    root.title(
+        "Student Database - Smart Attendance System"
     )
 
-except:
+    root.geometry(
+        "1050x800"
+    )
 
-    pass
+    root.minsize(
+        950,
+        700
+    )
+
+    root.configure(
+        bg="#EAF2F8"
+    )
+
+    root.resizable(
+        True,
+        True
+    )
 
 
-style.configure(
-    "Treeview",
-    font=("Segoe UI", 10),
-    rowheight=30,
-    background="white",
-    fieldbackground="white"
-)
+    # ============================================================
+    # STYLE
+    # ============================================================
 
-style.configure(
-    "Treeview.Heading",
-    font=("Segoe UI", 10, "bold")
-)
+    style = ttk.Style()
 
-style.map(
-    "Treeview",
-    background=[
-        ("selected", "#D6EAF8")
-    ],
-    foreground=[
-        ("selected", "#0B3C5D")
+    try:
+
+        style.theme_use(
+            "clam"
+        )
+
+    except:
+
+        pass
+
+
+    style.configure(
+        "Treeview",
+        font=("Segoe UI", 10),
+        rowheight=30,
+        background="white",
+        fieldbackground="white"
+    )
+
+    style.configure(
+        "Treeview.Heading",
+        font=("Segoe UI", 10, "bold")
+    )
+
+    style.map(
+        "Treeview",
+        background=[
+            ("selected", "#D6EAF8")
+        ],
+        foreground=[
+            ("selected", "#0B3C5D")
+        ]
+    )
+
+
+    # ============================================================
+    # TITLE
+    # ============================================================
+
+    title = tk.Label(
+        root,
+        text="STUDENT DATABASE",
+        font=("Segoe UI", 25, "bold"),
+        bg="#EAF2F8",
+        fg="#0B3C5D"
+    )
+
+    title.pack(
+        pady=(15, 5)
+    )
+
+
+    tk.Label(
+        root,
+        text="Student Management • Search • Edit • Attendance History",
+        font=("Segoe UI", 10),
+        bg="#EAF2F8",
+        fg="#5D6D7E"
+    ).pack(
+        pady=(0, 10)
+    )
+
+
+    # ============================================================
+    # SEARCH FRAME
+    # ============================================================
+
+    search_frame = tk.Frame(
+        root,
+        bg="#EAF2F8"
+    )
+
+    search_frame.pack(
+        pady=5
+    )
+
+
+    tk.Label(
+        search_frame,
+        text="Search:",
+        font=("Segoe UI", 11, "bold"),
+        bg="#EAF2F8",
+        fg="#34495E"
+    ).grid(
+        row=0,
+        column=0,
+        padx=5
+    )
+
+
+    search_entry = tk.Entry(
+        search_frame,
+        width=30,
+        font=("Segoe UI", 11)
+    )
+
+    search_entry.grid(
+        row=0,
+        column=1,
+        padx=5
+    )
+
+
+    search_button = tk.Button(
+        search_frame,
+        text="🔍 Search",
+        width=14,
+        bg="#27AE60",
+        fg="white",
+        activebackground="#229954",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=search_student
+    )
+
+    search_button.grid(
+        row=0,
+        column=2,
+        padx=5
+    )
+
+
+    clear_search_button = tk.Button(
+        search_frame,
+        text="✖ Clear",
+        width=12,
+        bg="#7F8C8D",
+        fg="white",
+        activebackground="#707B7C",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=clear_search
+    )
+
+    clear_search_button.grid(
+        row=0,
+        column=3,
+        padx=5
+    )
+
+
+    # Press Enter to search
+
+    search_entry.bind(
+        "<Return>",
+        lambda event: search_student()
+    )
+
+
+    # ============================================================
+    # STUDENT TABLE FRAME
+    # ============================================================
+
+    table_container = tk.Frame(
+        root,
+        bg="#EAF2F8"
+    )
+
+    table_container.pack(
+        fill="both",
+        expand=True,
+        padx=25,
+        pady=10
+    )
+
+
+    # ============================================================
+    # TABLE SCROLLBARS
+    # ============================================================
+
+    table_vertical_scrollbar = ttk.Scrollbar(
+        table_container,
+        orient="vertical"
+    )
+
+    table_vertical_scrollbar.pack(
+        side="right",
+        fill="y"
+    )
+
+
+    table_horizontal_scrollbar = ttk.Scrollbar(
+        table_container,
+        orient="horizontal"
+    )
+
+    table_horizontal_scrollbar.pack(
+        side="bottom",
+        fill="x"
+    )
+
+
+    # ============================================================
+    # STUDENT TABLE
+    # ============================================================
+
+    columns = (
+        "Student ID",
+        "Student Name",
+        "Department",
+        "Year"
+    )
+
+
+    tree = ttk.Treeview(
+        table_container,
+        columns=columns,
+        show="headings",
+        yscrollcommand=table_vertical_scrollbar.set,
+        xscrollcommand=table_horizontal_scrollbar.set,
+        selectmode="browse"
+    )
+
+
+    table_vertical_scrollbar.config(
+        command=tree.yview
+    )
+
+    table_horizontal_scrollbar.config(
+        command=tree.xview
+    )
+
+
+    # ============================================================
+    # TABLE HEADINGS
+    # ============================================================
+
+    tree.heading(
+        "Student ID",
+        text="Student ID"
+    )
+
+    tree.heading(
+        "Student Name",
+        text="Student Name"
+    )
+
+    tree.heading(
+        "Department",
+        text="Department"
+    )
+
+    tree.heading(
+        "Year",
+        text="Year"
+    )
+
+
+    # ============================================================
+    # TABLE COLUMN WIDTHS
+    # ============================================================
+
+    tree.column(
+        "Student ID",
+        width=180,
+        minwidth=130,
+        anchor="center"
+    )
+
+    tree.column(
+        "Student Name",
+        width=250,
+        minwidth=180,
+        anchor="center"
+    )
+
+    tree.column(
+        "Department",
+        width=220,
+        minwidth=150,
+        anchor="center"
+    )
+
+    tree.column(
+        "Year",
+        width=150,
+        minwidth=100,
+        anchor="center"
+    )
+
+
+    tree.pack(
+        fill="both",
+        expand=True
+    )
+
+
+    # Select student
+
+    tree.bind(
+        "<<TreeviewSelect>>",
+        load_selected_student
+    )
+
+
+    # Double-click student
+
+    tree.bind(
+        "<Double-1>",
+        double_click_attendance
+    )
+
+
+    # ============================================================
+    # ADD STUDENT FRAME
+    # ============================================================
+
+    add_frame = tk.LabelFrame(
+        root,
+        text="ADD NEW STUDENT",
+        font=("Segoe UI", 11, "bold"),
+        bg="#EAF2F8",
+        fg="#0B3C5D",
+        padx=10,
+        pady=8
+    )
+
+    add_frame.pack(
+        fill="x",
+        padx=25,
+        pady=5
+    )
+
+
+    # Student ID
+
+    tk.Label(
+        add_frame,
+        text="Student ID",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=0,
+        padx=8,
+        pady=5
+    )
+
+
+    add_id_entry = tk.Entry(
+        add_frame,
+        width=18,
+        font=("Segoe UI", 10)
+    )
+
+    add_id_entry.grid(
+        row=0,
+        column=1,
+        padx=8
+    )
+
+
+    # Name
+
+    tk.Label(
+        add_frame,
+        text="Name",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=2,
+        padx=8
+    )
+
+
+    add_name_entry = tk.Entry(
+        add_frame,
+        width=25,
+        font=("Segoe UI", 10)
+    )
+
+    add_name_entry.grid(
+        row=0,
+        column=3,
+        padx=8
+    )
+
+
+    # Department
+
+    tk.Label(
+        add_frame,
+        text="Department",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=4,
+        padx=8
+    )
+
+
+    departments = [
+        "AI & DS",
+        "CSE",
+        "ECE",
+        "EEE",
+        "B.Com",
+        "MECH",
+        "CIVIL",
+        "IT"
     ]
-)
-
-
-# ============================================================
-# TITLE
-# ============================================================
-
-title = tk.Label(
-    root,
-    text="STUDENT DATABASE",
-    font=("Segoe UI", 25, "bold"),
-    bg="#EAF2F8",
-    fg="#0B3C5D"
-)
-
-title.pack(
-    pady=(15, 5)
-)
-
-
-tk.Label(
-    root,
-    text="Student Management • Search • Edit • Attendance History",
-    font=("Segoe UI", 10),
-    bg="#EAF2F8",
-    fg="#5D6D7E"
-).pack(
-    pady=(0, 10)
-)
-
-
-# ============================================================
-# SEARCH FRAME
-# ============================================================
-
-search_frame = tk.Frame(
-    root,
-    bg="#EAF2F8"
-)
-
-search_frame.pack(
-    pady=5
-)
-
-
-tk.Label(
-    search_frame,
-    text="Search:",
-    font=("Segoe UI", 11, "bold"),
-    bg="#EAF2F8",
-    fg="#34495E"
-).grid(
-    row=0,
-    column=0,
-    padx=5
-)
-
-
-search_entry = tk.Entry(
-    search_frame,
-    width=30,
-    font=("Segoe UI", 11)
-)
-
-search_entry.grid(
-    row=0,
-    column=1,
-    padx=5
-)
-
-
-search_button = tk.Button(
-    search_frame,
-    text="🔍 Search",
-    width=14,
-    bg="#27AE60",
-    fg="white",
-    activebackground="#229954",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=search_student
-)
-
-search_button.grid(
-    row=0,
-    column=2,
-    padx=5
-)
-
-
-clear_search_button = tk.Button(
-    search_frame,
-    text="✖ Clear",
-    width=12,
-    bg="#7F8C8D",
-    fg="white",
-    activebackground="#707B7C",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=clear_search
-)
 
-clear_search_button.grid(
-    row=0,
-    column=3,
-    padx=5
-)
 
-
-# Press Enter to search
-
-search_entry.bind(
-    "<Return>",
-    lambda event: search_student()
-)
-
-
-# ============================================================
-# STUDENT TABLE FRAME
-# ============================================================
-
-table_container = tk.Frame(
-    root,
-    bg="#EAF2F8"
-)
-
-table_container.pack(
-    fill="both",
-    expand=True,
-    padx=25,
-    pady=10
-)
-
-
-# ============================================================
-# TABLE SCROLLBARS
-# ============================================================
-
-table_vertical_scrollbar = ttk.Scrollbar(
-    table_container,
-    orient="vertical"
-)
-
-table_vertical_scrollbar.pack(
-    side="right",
-    fill="y"
-)
-
-
-table_horizontal_scrollbar = ttk.Scrollbar(
-    table_container,
-    orient="horizontal"
-)
-
-table_horizontal_scrollbar.pack(
-    side="bottom",
-    fill="x"
-)
-
-
-# ============================================================
-# STUDENT TABLE
-# ============================================================
-
-columns = (
-    "Student ID",
-    "Student Name",
-    "Department",
-    "Year"
-)
-
-
-tree = ttk.Treeview(
-    table_container,
-    columns=columns,
-    show="headings",
-    yscrollcommand=table_vertical_scrollbar.set,
-    xscrollcommand=table_horizontal_scrollbar.set,
-    selectmode="browse"
-)
-
-
-table_vertical_scrollbar.config(
-    command=tree.yview
-)
-
-table_horizontal_scrollbar.config(
-    command=tree.xview
-)
-
-
-# ============================================================
-# TABLE HEADINGS
-# ============================================================
-
-tree.heading(
-    "Student ID",
-    text="Student ID"
-)
-
-tree.heading(
-    "Student Name",
-    text="Student Name"
-)
-
-tree.heading(
-    "Department",
-    text="Department"
-)
-
-tree.heading(
-    "Year",
-    text="Year"
-)
-
-
-# ============================================================
-# TABLE COLUMN WIDTHS
-# ============================================================
-
-tree.column(
-    "Student ID",
-    width=180,
-    minwidth=130,
-    anchor="center"
-)
-
-tree.column(
-    "Student Name",
-    width=250,
-    minwidth=180,
-    anchor="center"
-)
-
-tree.column(
-    "Department",
-    width=220,
-    minwidth=150,
-    anchor="center"
-)
-
-tree.column(
-    "Year",
-    width=150,
-    minwidth=100,
-    anchor="center"
-)
-
-
-tree.pack(
-    fill="both",
-    expand=True
-)
-
-
-# Select student
-
-tree.bind(
-    "<<TreeviewSelect>>",
-    load_selected_student
-)
-
-
-# Double-click student
-
-tree.bind(
-    "<Double-1>",
-    double_click_attendance
-)
-
-
-# ============================================================
-# ADD STUDENT FRAME
-# ============================================================
-
-add_frame = tk.LabelFrame(
-    root,
-    text="ADD NEW STUDENT",
-    font=("Segoe UI", 11, "bold"),
-    bg="#EAF2F8",
-    fg="#0B3C5D",
-    padx=10,
-    pady=8
-)
-
-add_frame.pack(
-    fill="x",
-    padx=25,
-    pady=5
-)
-
-
-# Student ID
-
-tk.Label(
-    add_frame,
-    text="Student ID",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=0,
-    padx=8,
-    pady=5
-)
-
-
-add_id_entry = tk.Entry(
-    add_frame,
-    width=18,
-    font=("Segoe UI", 10)
-)
-
-add_id_entry.grid(
-    row=0,
-    column=1,
-    padx=8
-)
-
-
-# Name
-
-tk.Label(
-    add_frame,
-    text="Name",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=2,
-    padx=8
-)
-
-
-add_name_entry = tk.Entry(
-    add_frame,
-    width=25,
-    font=("Segoe UI", 10)
-)
-
-add_name_entry.grid(
-    row=0,
-    column=3,
-    padx=8
-)
-
-
-# Department
-
-tk.Label(
-    add_frame,
-    text="Department",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=4,
-    padx=8
-)
-
-
-departments = [
-    "AI & DS",
-    "CSE",
-    "ECE",
-    "EEE",
-    "B.Com",
-    "MECH",
-    "CIVIL",
-    "IT"
-]
-
-
-add_department_combo = ttk.Combobox(
-    add_frame,
-    values=departments,
-    width=17,
-    state="readonly"
-)
-
-add_department_combo.grid(
-    row=0,
-    column=5,
-    padx=8
-)
-
-
-# Year
-
-tk.Label(
-    add_frame,
-    text="Year",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=6,
-    padx=8
-)
-
-
-years = [
-    "I",
-    "II",
-    "III",
-    "IV"
-]
-
-
-add_year_combo = ttk.Combobox(
-    add_frame,
-    values=years,
-    width=8,
-    state="readonly"
-)
-
-add_year_combo.grid(
-    row=0,
-    column=7,
-    padx=8
-)
-
-
-# Add button
-
-tk.Button(
-    add_frame,
-    text="➕ Add Student",
-    width=16,
-    bg="#2980B9",
-    fg="white",
-    activebackground="#2471A3",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=add_student
-).grid(
-    row=0,
-    column=8,
-    padx=12
-)
-
-
-# ============================================================
-# EDIT STUDENT FRAME
-# ============================================================
-
-edit_frame = tk.LabelFrame(
-    root,
-    text="EDIT SELECTED STUDENT",
-    font=("Segoe UI", 11, "bold"),
-    bg="#EAF2F8",
-    fg="#0B3C5D",
-    padx=10,
-    pady=8
-)
-
-edit_frame.pack(
-    fill="x",
-    padx=25,
-    pady=5
-)
-
-
-# Name
-
-tk.Label(
-    edit_frame,
-    text="Name",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=0,
-    padx=8
-)
-
-
-name_entry = tk.Entry(
-    edit_frame,
-    width=25,
-    font=("Segoe UI", 10)
-)
-
-name_entry.grid(
-    row=0,
-    column=1,
-    padx=8
-)
-
-
-# Department
-
-tk.Label(
-    edit_frame,
-    text="Department",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=2,
-    padx=8
-)
-
-
-department_combo = ttk.Combobox(
-    edit_frame,
-    values=departments,
-    width=17,
-    state="readonly"
-)
-
-department_combo.grid(
-    row=0,
-    column=3,
-    padx=8
-)
-
-
-# Year
-
-tk.Label(
-    edit_frame,
-    text="Year",
-    font=("Segoe UI", 9, "bold"),
-    bg="#EAF2F8"
-).grid(
-    row=0,
-    column=4,
-    padx=8
-)
-
-
-year_combo = ttk.Combobox(
-    edit_frame,
-    values=years,
-    width=8,
-    state="readonly"
-)
-
-year_combo.grid(
-    row=0,
-    column=5,
-    padx=8
-)
-
-
-# ============================================================
-# TOTAL STUDENTS LABEL
-# ============================================================
-
-total_label = tk.Label(
-    root,
-    text="Total Students : 0",
-    font=("Segoe UI", 11, "bold"),
-    bg="#EAF2F8",
-    fg="#27AE60"
-)
-
-total_label.pack(
-    pady=5
-)
-
-
-# ============================================================
-# BUTTON FRAME
-# ============================================================
-
-button_frame = tk.Frame(
-    root,
-    bg="#EAF2F8"
-)
-
-button_frame.pack(
-    pady=8
-)
-
-
-# Refresh
-
-tk.Button(
-    button_frame,
-    text="🔄 Refresh",
-    width=17,
-    bg="#3498DB",
-    fg="white",
-    activebackground="#2980B9",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=refresh_table
-).grid(
-    row=0,
-    column=0,
-    padx=6
-)
-
-
-# Update
-
-tk.Button(
-    button_frame,
-    text="💾 Update Student",
-    width=18,
-    bg="#27AE60",
-    fg="white",
-    activebackground="#229954",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=update_student
-).grid(
-    row=0,
-    column=1,
-    padx=6
-)
-
-
-# Delete
-
-tk.Button(
-    button_frame,
-    text="🗑 Delete Student",
-    width=18,
-    bg="#F39C12",
-    fg="white",
-    activebackground="#D68910",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=delete_student
-).grid(
-    row=0,
-    column=2,
-    padx=6
-)
-
-
-# Attendance
-
-tk.Button(
-    button_frame,
-    text="📋 View Attendance",
-    width=18,
-    bg="#8E44AD",
-    fg="white",
-    activebackground="#7D3C98",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=view_attendance
-).grid(
-    row=0,
-    column=3,
-    padx=6
-)
-
-
-# Close
-
-tk.Button(
-    button_frame,
-    text="❌ Close",
-    width=14,
-    bg="#E74C3C",
-    fg="white",
-    activebackground="#C0392B",
-    font=("Segoe UI", 10, "bold"),
-    bd=0,
-    cursor="hand2",
-    command=root.destroy
-).grid(
-    row=0,
-    column=4,
-    padx=6
-)
-
-
-# ============================================================
-# FOOTER
-# ============================================================
-
-tk.Label(
-    root,
-    text="Smart Attendance System • SQLite Student Management",
-    font=("Segoe UI", 8),
-    bg="#EAF2F8",
-    fg="#777777"
-).pack(
-    pady=5
-)
-
-
-# ============================================================
-# INITIAL LOAD
-# ============================================================
-
-load_students()
-
-
-# ============================================================
-# START APPLICATION
-# ============================================================
-
-root.mainloop()
+    add_department_combo = ttk.Combobox(
+        add_frame,
+        values=departments,
+        width=17,
+        state="readonly"
+    )
+
+    add_department_combo.grid(
+        row=0,
+        column=5,
+        padx=8
+    )
+
+
+    # Year
+
+    tk.Label(
+        add_frame,
+        text="Year",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=6,
+        padx=8
+    )
+
+
+    years = [
+        "I",
+        "II",
+        "III",
+        "IV"
+    ]
+
+
+    add_year_combo = ttk.Combobox(
+        add_frame,
+        values=years,
+        width=8,
+        state="readonly"
+    )
+
+    add_year_combo.grid(
+        row=0,
+        column=7,
+        padx=8
+    )
+
+
+    # Add button
+
+    tk.Button(
+        add_frame,
+        text="➕ Add Student",
+        width=16,
+        bg="#2980B9",
+        fg="white",
+        activebackground="#2471A3",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=add_student
+    ).grid(
+        row=0,
+        column=8,
+        padx=12
+    )
+
+
+    # ============================================================
+    # EDIT STUDENT FRAME
+    # ============================================================
+
+    edit_frame = tk.LabelFrame(
+        root,
+        text="EDIT SELECTED STUDENT",
+        font=("Segoe UI", 11, "bold"),
+        bg="#EAF2F8",
+        fg="#0B3C5D",
+        padx=10,
+        pady=8
+    )
+
+    edit_frame.pack(
+        fill="x",
+        padx=25,
+        pady=5
+    )
+
+
+    # Name
+
+    tk.Label(
+        edit_frame,
+        text="Name",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=0,
+        padx=8
+    )
+
+
+    name_entry = tk.Entry(
+        edit_frame,
+        width=25,
+        font=("Segoe UI", 10)
+    )
+
+    name_entry.grid(
+        row=0,
+        column=1,
+        padx=8
+    )
+
+
+    # Department
+
+    tk.Label(
+        edit_frame,
+        text="Department",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=2,
+        padx=8
+    )
+
+
+    department_combo = ttk.Combobox(
+        edit_frame,
+        values=departments,
+        width=17,
+        state="readonly"
+    )
+
+    department_combo.grid(
+        row=0,
+        column=3,
+        padx=8
+    )
+
+
+    # Year
+
+    tk.Label(
+        edit_frame,
+        text="Year",
+        font=("Segoe UI", 9, "bold"),
+        bg="#EAF2F8"
+    ).grid(
+        row=0,
+        column=4,
+        padx=8
+    )
+
+
+    year_combo = ttk.Combobox(
+        edit_frame,
+        values=years,
+        width=8,
+        state="readonly"
+    )
+
+    year_combo.grid(
+        row=0,
+        column=5,
+        padx=8
+    )
+
+
+    # ============================================================
+    # TOTAL STUDENTS LABEL
+    # ============================================================
+
+    total_label = tk.Label(
+        root,
+        text="Total Students : 0",
+        font=("Segoe UI", 11, "bold"),
+        bg="#EAF2F8",
+        fg="#27AE60"
+    )
+
+    total_label.pack(
+        pady=5
+    )
+
+
+    # ============================================================
+    # BUTTON FRAME
+    # ============================================================
+
+    button_frame = tk.Frame(
+        root,
+        bg="#EAF2F8"
+    )
+
+    button_frame.pack(
+        pady=8
+    )
+
+
+    # Refresh
+
+    tk.Button(
+        button_frame,
+        text="🔄 Refresh",
+        width=17,
+        bg="#3498DB",
+        fg="white",
+        activebackground="#2980B9",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=refresh_table
+    ).grid(
+        row=0,
+        column=0,
+        padx=6
+    )
+
+
+    # Update
+
+    tk.Button(
+        button_frame,
+        text="💾 Update Student",
+        width=18,
+        bg="#27AE60",
+        fg="white",
+        activebackground="#229954",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=update_student
+    ).grid(
+        row=0,
+        column=1,
+        padx=6
+    )
+
+
+    # Delete
+
+    tk.Button(
+        button_frame,
+        text="🗑 Delete Student",
+        width=18,
+        bg="#F39C12",
+        fg="white",
+        activebackground="#D68910",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=delete_student
+    ).grid(
+        row=0,
+        column=2,
+        padx=6
+    )
+
+
+    # Attendance
+
+    tk.Button(
+        button_frame,
+        text="📋 View Attendance",
+        width=18,
+        bg="#8E44AD",
+        fg="white",
+        activebackground="#7D3C98",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=view_attendance
+    ).grid(
+        row=0,
+        column=3,
+        padx=6
+    )
+
+
+    # Close
+
+    tk.Button(
+        button_frame,
+        text="❌ Close",
+        width=14,
+        bg="#E74C3C",
+        fg="white",
+        activebackground="#C0392B",
+        font=("Segoe UI", 10, "bold"),
+        bd=0,
+        cursor="hand2",
+        command=root.destroy
+    ).grid(
+        row=0,
+        column=4,
+        padx=6
+    )
+
+
+    # ============================================================
+    # FOOTER
+    # ============================================================
+
+    tk.Label(
+        root,
+        text="Smart Attendance System • SQLite Student Management",
+        font=("Segoe UI", 8),
+        bg="#EAF2F8",
+        fg="#777777"
+    ).pack(
+        pady=5
+    )
+
+
+    # ============================================================
+    # INITIAL LOAD
+    # ============================================================
+
+    load_students()
+
+
+    # ============================================================
+    # START APPLICATION
+    # ============================================================
+
+    root.mainloop()
+
+
+main = launch_student_database
+
+if __name__ == "__main__":
+    launch_student_database()

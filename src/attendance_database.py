@@ -160,183 +160,207 @@ def refresh():
 
 
 # =====================================================
-# WINDOW
+# MODULE-LEVEL WIDGET REFERENCES
 # =====================================================
 
-root = tk.Tk()
-
-root.title("Attendance Database")
-
-root.geometry("1250x720")
-
-root.configure(bg="#EAF2F8")
-
-root.resizable(False, False)
+root = None
+id_entry = None
+date_entry = None
+tree = None
+total_label = None
 
 
 # =====================================================
-# TITLE
+# APPLICATION ENTRY POINT
 # =====================================================
 
-title = tk.Label(
-    root,
-    text="ATTENDANCE DATABASE",
-    font=("Segoe UI",24,"bold"),
-    bg="#EAF2F8",
-    fg="#0B3C5D"
-)
+def launch_attendance_database():
+    global root, id_entry, date_entry, tree, total_label
 
-title.pack(pady=15)
+    # =====================================================
+    # WINDOW
+    # =====================================================
 
+    root = tk.Tk()
 
-# =====================================================
-# SEARCH FRAME
-# =====================================================
+    root.title("Attendance Database")
 
-search_frame = tk.Frame(
-    root,
-    bg="#EAF2F8"
-)
+    root.geometry("1250x720")
 
-search_frame.pack(pady=10)
+    root.configure(bg="#EAF2F8")
 
-tk.Label(
-    search_frame,
-    text="Student ID",
-    font=("Segoe UI",11,"bold"),
-    bg="#EAF2F8"
-).grid(row=0,column=0,padx=5)
-
-id_entry = tk.Entry(
-    search_frame,
-    width=20,
-    font=("Segoe UI",11)
-)
-
-id_entry.grid(row=0,column=1,padx=10)
-
-tk.Label(
-    search_frame,
-    text="Date (DD-MM-YYYY)",
-    font=("Segoe UI",11,"bold"),
-    bg="#EAF2F8"
-).grid(row=0,column=2,padx=5)
-
-date_entry = tk.Entry(
-    search_frame,
-    width=18,
-    font=("Segoe UI",11)
-)
-
-date_entry.grid(row=0,column=3,padx=10)
-
-tk.Button(
-    search_frame,
-    text="🔍 Search",
-    bg="#27AE60",
-    fg="white",
-    font=("Segoe UI",11,"bold"),
-    width=15,
-    command=search_attendance
-).grid(row=0,column=4,padx=10)
+    root.resizable(False, False)
 
 
-# =====================================================
-# TABLE
-# =====================================================
+    # =====================================================
+    # TITLE
+    # =====================================================
 
-columns = (
-    "Student ID",
-    "Student Name",
-    "Department",
-    "Year",
-    "Date",
-    "Time",
-    "Confidence",
-    "Status"
-)
-
-tree = ttk.Treeview(
-    root,
-    columns=columns,
-    show="headings",
-    height=18
-)
-
-for column in columns:
-
-    tree.heading(column, text=column)
-
-    tree.column(
-        column,
-        anchor="center",
-        width=140
+    title = tk.Label(
+        root,
+        text="ATTENDANCE DATABASE",
+        font=("Segoe UI",24,"bold"),
+        bg="#EAF2F8",
+        fg="#0B3C5D"
     )
 
-tree.pack(pady=15)
+    title.pack(pady=15)
 
 
-# =====================================================
-# TOTAL
-# =====================================================
+    # =====================================================
+    # SEARCH FRAME
+    # =====================================================
 
-total_label = tk.Label(
-    root,
-    text="Total Records : 0",
-    font=("Segoe UI",12,"bold"),
-    bg="#EAF2F8",
-    fg="green"
-)
+    search_frame = tk.Frame(
+        root,
+        bg="#EAF2F8"
+    )
 
-total_label.pack()
+    search_frame.pack(pady=10)
 
+    tk.Label(
+        search_frame,
+        text="Student ID",
+        font=("Segoe UI",11,"bold"),
+        bg="#EAF2F8"
+    ).grid(row=0,column=0,padx=5)
 
-# =====================================================
-# BUTTONS
-# =====================================================
+    id_entry = tk.Entry(
+        search_frame,
+        width=20,
+        font=("Segoe UI",11)
+    )
 
-button_frame = tk.Frame(
-    root,
-    bg="#EAF2F8"
-)
+    id_entry.grid(row=0,column=1,padx=10)
 
-button_frame.pack(pady=20)
+    tk.Label(
+        search_frame,
+        text="Date (DD-MM-YYYY)",
+        font=("Segoe UI",11,"bold"),
+        bg="#EAF2F8"
+    ).grid(row=0,column=2,padx=5)
 
-tk.Button(
-    button_frame,
-    text="🔄 Refresh",
-    width=18,
-    bg="#3498DB",
-    fg="white",
-    font=("Segoe UI",11,"bold"),
-    command=refresh
-).grid(row=0,column=0,padx=10)
+    date_entry = tk.Entry(
+        search_frame,
+        width=18,
+        font=("Segoe UI",11)
+    )
 
-tk.Button(
-    button_frame,
-    text="🗑 Delete Attendance",
-    width=18,
-    bg="#F39C12",
-    fg="white",
-    font=("Segoe UI",11,"bold"),
-    command=delete_record
-).grid(row=0,column=1,padx=10)
+    date_entry.grid(row=0,column=3,padx=10)
 
-tk.Button(
-    button_frame,
-    text="❌ Close",
-    width=18,
-    bg="#E74C3C",
-    fg="white",
-    font=("Segoe UI",11,"bold"),
-    command=root.destroy
-).grid(row=0,column=2,padx=10)
+    tk.Button(
+        search_frame,
+        text="🔍 Search",
+        bg="#27AE60",
+        fg="white",
+        font=("Segoe UI",11,"bold"),
+        width=15,
+        command=search_attendance
+    ).grid(row=0,column=4,padx=10)
 
 
-# =====================================================
-# INITIAL LOAD
-# =====================================================
+    # =====================================================
+    # TABLE
+    # =====================================================
 
-load_attendance()
+    columns = (
+        "Student ID",
+        "Student Name",
+        "Department",
+        "Year",
+        "Date",
+        "Time",
+        "Confidence",
+        "Status"
+    )
 
-root.mainloop()
+    tree = ttk.Treeview(
+        root,
+        columns=columns,
+        show="headings",
+        height=18
+    )
+
+    for column in columns:
+
+        tree.heading(column, text=column)
+
+        tree.column(
+            column,
+            anchor="center",
+            width=140
+        )
+
+    tree.pack(pady=15)
+
+
+    # =====================================================
+    # TOTAL
+    # =====================================================
+
+    total_label = tk.Label(
+        root,
+        text="Total Records : 0",
+        font=("Segoe UI",12,"bold"),
+        bg="#EAF2F8",
+        fg="green"
+    )
+
+    total_label.pack()
+
+
+    # =====================================================
+    # BUTTONS
+    # =====================================================
+
+    button_frame = tk.Frame(
+        root,
+        bg="#EAF2F8"
+    )
+
+    button_frame.pack(pady=20)
+
+    tk.Button(
+        button_frame,
+        text="🔄 Refresh",
+        width=18,
+        bg="#3498DB",
+        fg="white",
+        font=("Segoe UI",11,"bold"),
+        command=refresh
+    ).grid(row=0,column=0,padx=10)
+
+    tk.Button(
+        button_frame,
+        text="🗑 Delete Attendance",
+        width=18,
+        bg="#F39C12",
+        fg="white",
+        font=("Segoe UI",11,"bold"),
+        command=delete_record
+    ).grid(row=0,column=1,padx=10)
+
+    tk.Button(
+        button_frame,
+        text="❌ Close",
+        width=18,
+        bg="#E74C3C",
+        fg="white",
+        font=("Segoe UI",11,"bold"),
+        command=root.destroy
+    ).grid(row=0,column=2,padx=10)
+
+
+    # =====================================================
+    # INITIAL LOAD
+    # =====================================================
+
+    load_attendance()
+
+    root.mainloop()
+
+
+main = launch_attendance_database
+
+if __name__ == "__main__":
+    launch_attendance_database()
