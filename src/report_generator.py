@@ -62,18 +62,14 @@ def sanitize_record(row):
     conf = safe_float(row[6])
     status = str(row[7])
 
-    # 1. Alias the Professional Identity
-    if name in ["Stephen", "Stephen Raj T"]:
-        name = "Stephen Raj"
-
-    # 2. Fix Database Shift (e.g., Vishwa row where Dept='IV' and Year='2026004')
+    # 1. Fix swapped year/department fields from legacy records
     if len(year) > 4 and dept.upper() in ["I", "II", "III", "IV"]:
         year = dept.upper()
-        dept = "B.Com" if "Vishwa" in name else "AI & DS"
+        dept = "-"
 
-    # 3. Clean rogue empty departments
-    if dept.upper() in ["IV", "III", "II", "I", "1", "2", "3", "4", "NONE", "NULL", "-"]:
-        dept = "AI & DS"
+    # 2. Normalize empty or invalid department values consistently
+    if not dept or dept.upper() in ["IV", "III", "II", "I", "1", "2", "3", "4", "NONE", "NULL", "-"]:
+        dept = "-"
 
     return [sid, name, dept, year, date, time, conf, status]
 

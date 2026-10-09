@@ -964,7 +964,6 @@ class AdminDashboard:
 
                     # Minimalist Floating Tag (NO clumsy background box)
                     display_name = face["student_name"].upper()
-                    if display_name in ["STEPHEN", "STEPHEN RAJ T"]: display_name = "STEPHEN RAJ"
                     if not is_known: display_name = face["student_name"] 
                     
                     # Draw text with a black outline so it is always readable without looking messy

@@ -161,7 +161,7 @@ def generate_web_dashboard(launch_browser=True):
         if conf < 75.0 or "Unknown" in str(r[1]):
             severity = "CRITICAL" if conf < 60 else "MEDIUM"
             color = "text-red-400 bg-red-400/10 border-red-400/20" if severity == "CRITICAL" else "text-amber-400 bg-amber-400/10 border-amber-400/20"
-            display_threat_name = "Stephen Raj" if str(r[1]) in ["Stephen", "Stephen Raj T"] else str(r[1])
+            display_threat_name = str(r[1])
             threats_html += f'''
             <div class="flex items-center justify-between p-3 border-b border-white/5 hover:bg-white/5 transition-colors">
                 <div class="flex flex-col"><span class="text-sm font-bold text-slate-200">{display_threat_name}</span><span class="text-xs text-slate-500">{r[5]} • Match: {conf}%</span></div>
@@ -228,7 +228,7 @@ def generate_web_dashboard(launch_browser=True):
     for r in recent_activity:
         conf = float(str(r[6]).replace('%', '')) if r[6] else 0.0
         status_col = "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" if "Present" in str(r[7]) else "text-amber-400 bg-amber-400/10 border-amber-400/20"
-        display_name = "Stephen Raj" if str(r[1]) in ["Stephen", "Stephen Raj T"] else str(r[1])
+        display_name = str(r[1])
         act_rows += f'<tr class="border-b border-white/5 hover:bg-white/[0.02] transition-colors"><td class="p-3 text-sm text-slate-400">{r[4]} {r[5]}</td><td class="p-3 text-sm font-semibold text-slate-100">{display_name}</td><td class="p-3 text-sm text-slate-400">{r[2]}</td><td class="p-3 text-sm font-mono text-cyan-400">{conf:.1f}%</td><td class="p-3 text-sm"><span class="px-2 py-1 rounded text-[10px] font-bold border {status_col} uppercase tracking-wider">{r[7]}</span></td></tr>'
 
     # Student Analysis Rows & Palette Items
@@ -240,7 +240,7 @@ def generate_web_dashboard(launch_browser=True):
         elif pct >= 60: stat, st_col = "WATCH", "text-amber-400 bg-amber-400/10 border-amber-400/20"
         else: stat, st_col = "CRITICAL", "text-red-400 bg-red-400/10 border-red-400/20"
         
-        display_name = "Stephen Raj" if str(r[1]) in ["Stephen", "Stephen Raj T"] else str(r[1])
+        display_name = str(r[1])
         ana_rows += f'<tr onclick="openDrawer(\'{display_name}\', \'{r[0]}\', \'{r[2]}\', {pct:.1f}, {r[4]}, {r[5]})" class="border-b border-white/5 hover:bg-white/[0.04] transition-colors cursor-pointer"><td class="p-3 text-sm text-slate-400">{r[0]}</td><td class="p-3 text-sm font-semibold text-slate-100">{display_name}</td><td class="p-3 text-sm text-slate-400">{r[2]}</td><td class="p-3 text-sm font-bold text-slate-300">{r[4]}</td><td class="p-3 text-sm font-bold text-slate-300">{r[5]}</td><td class="p-3 text-sm font-mono text-blue-400">{pct:.1f}%</td><td class="p-3 text-sm"><span class="px-2 py-1 rounded text-[10px] font-bold border {st_col} uppercase tracking-wider">{stat}</span></td></tr>'
         
         student_commands += f'''
@@ -360,7 +360,7 @@ def generate_web_dashboard(launch_browser=True):
                 <div class="w-16 h-16 rounded-full bg-elevated border border-white/10 flex items-center justify-center text-xl font-bold text-cyan-400" id="dr-initial">S</div>
                 <div>
                     <h3 class="text-xl font-bold text-main" id="dr-name">Student Name</h3>
-                    <p class="text-sm text-muted" id="dr-id">ID: 2026001 • Dept</p>
+                    <p class="text-sm text-muted" id="dr-id">ID: - • -</p>
                 </div>
             </div>
             <div class="enterprise-card p-4 mb-6 text-center">
