@@ -285,6 +285,8 @@ class RecognitionEngine:
         self.threat_dir = os.path.join(self.base_dir, "reports", "threat_captures")
         os.makedirs(self.threat_dir, exist_ok=True)
         self.threat_cooldown = 0
+        self.db_path = os.path.join(self.base_dir, "database", "attendance.db")
+        self._student_metadata_cache = {}
 
         self.last_name = "Unknown"
         self.last_student_name = "Unknown"
@@ -311,6 +313,53 @@ class RecognitionEngine:
             if key == 27 or key == ord("q"):
                 break
         self.cap.release()
+
+    def _resolve_student_metadata(self, student_id):
+        """Resolves student metadata (name, department, year) prioritizing the local SQLite database.
+
+        Falls back to STUDENT_INFO if database or record is unavailable.
+        Caches successful database lookups in memory.
+        """
+        if not student_id or student_id == "Unknown":
+            return None
+
+        if hasattr(self, "_student_metadata_cache") and student_id in self._student_metadata_cache:
+            return self._student_metadata_cache[student_id]
+
+        db_path = getattr(self, "db_path", None)
+        if not db_path and hasattr(self, "base_dir"):
+            db_path = os.path.join(self.base_dir, "database", "attendance.db")
+
+        if db_path and os.path.exists(db_path):
+            conn = None
+            try:
+                conn = sqlite3.connect(db_path, timeout=5.0)
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT student_name, department, year FROM students WHERE student_id = ?",
+                    (str(student_id),),
+                )
+                row = cursor.fetchone()
+                if row and row[0] and str(row[0]).strip():
+                    record = {
+                        "name": str(row[0]).strip(),
+                        "department": str(row[1]).strip() if row[1] else "-",
+                        "year": str(row[2]).strip() if row[2] else "-",
+                    }
+                    if not hasattr(self, "_student_metadata_cache"):
+                        self._student_metadata_cache = {}
+                    self._student_metadata_cache[student_id] = record
+                    return record
+            except Exception:
+                pass
+            finally:
+                if conn is not None:
+                    try:
+                        conn.close()
+                    except Exception:
+                        pass
+
+        return STUDENT_INFO.get(student_id)
 
     def process_frame(self, frame):
         t_start_total = time.time()
@@ -544,10 +593,10 @@ class RecognitionEngine:
             student_name, dept, year = "Unknown", "-", "-"
 
             if name != "Unknown":
-                student = STUDENT_INFO.get(name)
-                student_name = student["name"] if student else "Unknown"
-                dept = student["department"] if student else "-"
-                year = student["year"] if student else "-"
+                student = self._resolve_student_metadata(name)
+                student_name = student["name"] if student and student.get("name") else "Unknown"
+                dept = student["department"] if student and student.get("department") else "-"
+                year = student["year"] if student and student.get("year") else "-"
 
                 # ATTENDANCE SECURITY GATE:
                 # 1. Quality Valid
