@@ -1906,9 +1906,21 @@ class AdminDashboard:
         try:
             det_val = int(self.det_slider.get())
             match_val = int(self.match_slider.get())
-            config = {"detection_confidence": det_val, "match_threshold": match_val}
             config_path = os.path.join(self.base_dir, "config.json")
-            with open(config_path, 'w') as f: json.dump(config, f, indent=4)
+
+            config_data = {}
+            if os.path.exists(config_path):
+                with open(config_path, "r", encoding="utf-8") as f:
+                    loaded = json.load(f)
+                if not isinstance(loaded, dict):
+                    raise ValueError("Configuration root must be a dictionary")
+                config_data = loaded
+
+            config_data["detection_confidence"] = det_val
+            config_data["match_threshold"] = match_val
+
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(config_data, f, indent=4)
                 
             self.show_toast("Configuration Saved", "AI Vision Engine parameters updated securely.", self.colors["success"])
             self.log_audit_event("CONFIG_UPDATE", f"Admin updated AI parameters: Det={det_val}%, Match={match_val}%")
