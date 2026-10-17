@@ -17,6 +17,14 @@ try:
 except ImportError:
     from liveness_detector import BlinkDetector
 
+try:
+    from core.quality_diagnostics import FaceQualityDiagnostics
+except ImportError:
+    try:
+        from quality_diagnostics import FaceQualityDiagnostics
+    except ImportError:
+        FaceQualityDiagnostics = None
+
 # ============================================================
 # CONFIGURABLE PIPELINE CONSTANTS (GROUNDED IN EMPIRICAL AUDIT)
 # ============================================================
@@ -260,13 +268,23 @@ class RecognitionEngine:
         self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
         import json
+        self.enable_xfiqa = False
         try:
-            if os.path.exists("config.json"):
-                with open("config.json", "r") as f:
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            config_path = os.path.join(base_dir, "config.json")
+            if not os.path.exists(config_path):
+                config_path = "config.json"
+            if os.path.exists(config_path):
+                with open(config_path, "r") as f:
                     config = json.load(f)
                     self.face_detection_threshold = config.get("detection_confidence", 75) / 100.0
+                    self.enable_xfiqa = bool(config.get("enable_xfiqa_diagnostics", False))
+            else:
+                self.face_detection_threshold = DEFAULT_DETECTION_CONFIDENCE
+                self.enable_xfiqa = False
         except Exception:
             self.face_detection_threshold = DEFAULT_DETECTION_CONFIDENCE
+            self.enable_xfiqa = False
         self.detector_scale = DEFAULT_DETECTOR_SCALE
 
         self.process_every_n_frames = 3
@@ -433,6 +451,14 @@ class RecognitionEngine:
                 sanitized_box, raw_crop = sanitize_and_crop_face(rgb, raw_box, box_coords, margin_ratio=DEFAULT_MARGIN_RATIO)
                 is_quality_ok, quality_score, quality_reason = evaluate_crop_quality(raw_crop)
 
+                xfiqa_diag = None
+                if getattr(self, "enable_xfiqa", False) and FaceQualityDiagnostics is not None:
+                    if raw_crop is not None and getattr(raw_crop, "size", 0) > 0:
+                        try:
+                            xfiqa_diag = FaceQualityDiagnostics.analyze_crop(raw_crop, color_order="RGB")
+                        except Exception:
+                            xfiqa_diag = None
+
                 rec = {
                     "index": i,
                     "track": track,
@@ -444,6 +470,8 @@ class RecognitionEngine:
                     "ear": box_ears.get(i),
                     "embedding": None
                 }
+                if xfiqa_diag is not None:
+                    rec["quality_diagnostics"] = xfiqa_diag
                 prepared_faces.append(rec)
 
                 if is_quality_ok and raw_crop.size > 0:
@@ -675,7 +703,8 @@ class RecognitionEngine:
                 index=face_rec["index"], x=x, y=y, w=w, h=h,
                 name=name, student_name=student_name, dept=dept, year=year,
                 conf=conf, status=status, dist=min_dist,
-                temporal=min(5, track.temporal_frames), quality=quality_score
+                temporal=min(5, track.temporal_frames), quality=quality_score,
+                diagnostics=face_rec.get("quality_diagnostics")
             )
 
         if hasattr(self, '_faces_buffer'):
@@ -700,11 +729,13 @@ class RecognitionEngine:
 
         self.telemetry = self.smoothed_tel
 
-    def _store_face(self, index, x, y, w, h, name, student_name, dept, year, conf, status, dist, temporal, quality):
+    def _store_face(self, index, x, y, w, h, name, student_name, dept, year, conf, status, dist, temporal, quality, diagnostics=None):
         face_record = {
             "box": (x, y, w, h), "name": name, "student_name": student_name, "dept": dept, "year": year,
             "confidence": conf, "status": status, "distance": dist, "temporal": temporal, "quality": quality
         }
+        if diagnostics is not None:
+            face_record["quality_diagnostics"] = diagnostics
         if not hasattr(self, '_faces_buffer'):
             self._faces_buffer = []
         self._faces_buffer.append(face_record)

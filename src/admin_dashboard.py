@@ -973,7 +973,13 @@ class AdminDashboard:
                     # --- UPDATE MULTI-TARGET SIDEBAR CARDS (The heavy text stays here!) ---
                     if hasattr(self, 'target_slots'):
                         slot = self.target_slots[idx]
-                        meta_str = f"ID: {face['name']} • Qual: {face['quality']:.1f}% • Conf: {face['confidence'] * 100:.1f}%"
+                        qual_display = f"{face['quality']:.1f}%"
+                        xfiqa = face.get("quality_diagnostics")
+                        if isinstance(xfiqa, dict):
+                            tier = xfiqa.get("quality_tier")
+                            if tier in ("OPTIMAL", "ACCEPTABLE", "SUBOPTIMAL", "REJECT"):
+                                qual_display = f"{qual_display} [{tier}]"
+                        meta_str = f"ID: {face['name']} • Qual: {qual_display} • Conf: {face['confidence'] * 100:.1f}%"
                         
                         if "ALREADY" in status:
                             slot_color = self.colors.get("cyan", "#00E5FF")

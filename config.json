@@ -1,4 +1,5 @@
 {
     "detection_confidence": 85,
-    "match_threshold": 88
+    "match_threshold": 88,
+    "enable_xfiqa_diagnostics": false
 }
